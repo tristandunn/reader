@@ -1,0 +1,120 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+class ContinuousIntegration
+  COLORS = {
+    banner:   "\e[1;32m",
+    title:    "\e[1;35m",
+    subtitle: "\e[1;90m",
+    error:    "\e[1;31m",
+    success:  "\e[1;32m"
+  }.freeze
+
+  # Create a run with no results yet.
+  def initialize
+    @results = []
+  end
+
+  # Run each step, show how long it took, and exit with a failure status when
+  # any step failed.
+  #
+  # @param title [String] The heading of the run.
+  # @param subtitle [String] The line under the heading.
+  # @yield Declares the steps with {#step}.
+  # @return [void]
+  def self.run(title, subtitle, &)
+    ENV["CI"] = "true"
+
+    ci = new
+    ci.heading(title, subtitle, padding: false)
+    ci.report(title, &)
+
+    unless ci.success?
+      abort
+    end
+  end
+
+  # Show a heading, followed by an optional line under it.
+  #
+  # @param heading [String] The text of the heading.
+  # @param subtitle [String, nil] The line under the heading.
+  # @param padding [Boolean] Whether to leave blank lines around the heading.
+  # @param type [Symbol] The color, from `COLORS`.
+  # @return [void]
+  def heading(heading, subtitle = nil, padding: true, type: :banner)
+    echo("#{"\n\n" if padding}#{heading}", type: type)
+
+    if subtitle
+      echo("#{subtitle}#{"\n" if padding}", type: :subtitle)
+    end
+  end
+
+  # Run the block, then show whether its steps passed and how long they took.
+  #
+  # @param title [String] The name of what ran.
+  # @yield Declares the steps with {#step}.
+  # @return [void]
+  def report(title, &)
+    nested  = self.class.new
+    elapsed = timing { nested.instance_eval(&) }
+
+    if nested.success?
+      echo("\n✅ #{title} passed in #{elapsed}", type: :success)
+    else
+      echo("\n❌ #{title} failed in #{elapsed}", type: :error)
+    end
+
+    @results.concat(nested.results)
+  end
+
+  # Declare a step, and run its command right away.
+  #
+  # @param title [String] The name of the step.
+  # @param command [Array<String>] The command, which is run through a shell when it is a single string.
+  # @return [void]
+  def step(title, *command)
+    heading(title, command.join(" "), type: :title)
+    report(title) { @results << system(*command) }
+  end
+
+  # Return whether every step passed.
+  #
+  # @return [Boolean] Whether no step has failed.
+  def success?
+    @results.all?
+  end
+
+  protected
+
+  attr_reader :results
+
+  private
+
+  # Show text in the color of its type.
+  #
+  # @param text [String] The text to show.
+  # @param type [Symbol] The color, from `COLORS`.
+  # @return [void]
+  def echo(text, type:)
+    puts "#{COLORS.fetch(type)}#{text}\e[0m"
+  end
+
+  # Run the block and say how long it took.
+  #
+  # @yield What to time.
+  # @return [String] The time, in minutes when it was a minute or more, and in seconds.
+  def timing
+    started_at = Time.now.to_f
+
+    yield
+    minutes, seconds = (Time.now.to_f - started_at).divmod(60)
+
+    "#{"#{minutes}m" if minutes.positive?}#{format("%.2f", seconds)}s"
+  end
+end
+
+ContinuousIntegration.run("Continuous Integration", "Running style checks, documentation checks, and tests") do
+  step "Linting",       "bin/rubocop"
+  step "Documentation", "bin/yard-lint ."
+  step "Tests",         "COVERAGE=true bin/rspec"
+end

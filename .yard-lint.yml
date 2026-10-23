@@ -1,0 +1,10 @@
+AllValidators:
+  Exclude:
+   - "spec/**/*"
+   - "vendor/**/*"
+  FailOnSeverity: convention
+  YardOptions:
+    - --private
+
+Documentation/UndocumentedObjects:
+  Enabled: false
