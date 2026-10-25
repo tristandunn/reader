@@ -1,14 +1,28 @@
 # frozen_string_literal: true
 
 class ReadState
+  # Set whether the Feeds section of the sidebar is collapsed.
+  #
+  # @param value [Boolean] Whether the feeds should be hidden.
+  # @return [void]
+  attr_writer :feeds_collapsed
+
   # Load the state from its file, when there is one.
   #
   # @param path [String] The YAML file that holds the state.
   def initialize(path)
-    @path    = path
-    @read    = {}
-    @starred = {}
+    @path            = path
+    @read            = {}
+    @starred         = {}
+    @feeds_collapsed = false
     load
+  end
+
+  # Return whether the Feeds section of the sidebar is collapsed.
+  #
+  # @return [Boolean] Whether the feeds were left hidden.
+  def feeds_collapsed?
+    @feeds_collapsed
   end
 
   # Mark an article as read or as unread.
@@ -58,7 +72,8 @@ class ReadState
   #
   # @return [void]
   def save
-    File.write("#{@path}.tmp", YAML.dump("read" => @read, "starred" => @starred.keys))
+    File.write("#{@path}.tmp",
+               YAML.dump("read" => @read, "starred" => @starred.keys, "feeds_collapsed" => @feeds_collapsed))
     File.rename("#{@path}.tmp", @path)
   rescue StandardError => error
     warn "reader: cannot write #{@path}: #{error.message}"
@@ -117,6 +132,7 @@ class ReadState
     saved = YAML.safe_load_file(@path) if File.exist?(@path)
     @read = dated(saved&.dig("read"))
     @starred = ids(saved, "starred")
+    @feeds_collapsed = saved&.dig("feeds_collapsed") == true
   rescue StandardError => error
     warn "reader: cannot read #{@path}: #{error.message}"
   end

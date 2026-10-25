@@ -9,11 +9,12 @@ class Sidebar
   #
   # @param on_refresh [#call] Called when the refresh button is clicked.
   # @param on_select [#call] Called with the entry of a row that gets selected.
-  def initialize(on_refresh:, on_select:)
+  # @param state [ReadState] Where whether the feeds are collapsed is recorded.
+  def initialize(on_refresh:, on_select:, state:)
     @on_select  = on_select
     @rows       = []
     @rebuilding = false
-    @heading    = FeedsHeading.new(on_toggle: method(:apply_collapsed))
+    @heading    = FeedsHeading.new(state, on_toggle: method(:apply_collapsed))
     @list       = build_list
     @status     = RefreshStatus.new
     @widget     = build_widget(on_refresh)

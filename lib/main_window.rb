@@ -88,7 +88,7 @@ class MainWindow
   #
   # @return [void]
   def build_panes
-    @sidebar = Sidebar.new(on_refresh: method(:reload), on_select: method(:show_entry))
+    @sidebar = Sidebar.new(state: @state, on_refresh: method(:reload), on_select: method(:show_entry))
     @window.child = pane(@sidebar.widget, pane(build_list_column, build_reader_column, 380), 230)
   end
 

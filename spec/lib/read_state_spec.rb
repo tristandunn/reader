@@ -11,6 +11,24 @@ RSpec.describe ReadState do
     FileUtils.remove_entry(directory)
   end
 
+  describe "#feeds_collapsed=" do
+    it "collapses the feeds" do
+      expect { state.feeds_collapsed = true }.to change(state, :feeds_collapsed?).from(false).to(true)
+    end
+
+    it "expands the feeds" do
+      state.feeds_collapsed = true
+
+      expect { state.feeds_collapsed = false }.to change(state, :feeds_collapsed?).from(true).to(false)
+    end
+  end
+
+  describe "#feeds_collapsed?" do
+    it "is false for a new state" do
+      expect(state.feeds_collapsed?).to be(false)
+    end
+  end
+
   describe "#mark_read" do
     it "marks an article as read" do
       expect { state.mark_read(article, true) }.to change { state.read?(article) }.from(false).to(true)
@@ -92,6 +110,13 @@ RSpec.describe ReadState do
 
       it "keeps what was starred" do
         expect(reloaded.starred?(article)).to be(true)
+      end
+
+      it "keeps whether the feeds were collapsed" do
+        state.feeds_collapsed = true
+        state.save
+
+        expect(described_class.new(path).feeds_collapsed?).to be(true)
       end
 
       it "leaves no temporary file behind" do
