@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-ruby   "4.0.7"
+ruby   "4.0.9"
 source "https://rubygems.org"
 
 gem "base64",   "0.3.0"
@@ -22,7 +22,7 @@ group :development do
   gem "rubocop-rake",        "0.7.1",  require: false
   gem "rubocop-rspec",       "3.10.2", require: false
   gem "rubocop-vibe",        "0.6.0",  require: false
-  gem "yard-lint",           "1.12.0", require: false
+  gem "yard-lint",           "1.13.0", require: false
 end
 
 group :test do
