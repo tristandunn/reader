@@ -46,7 +46,6 @@ class ReaderPane
   # @return [void]
   def scroll_page
     adjustment = @scroll.vadjustment
-
     adjustment.value = [adjustment.value + (adjustment.page_size * 0.85), bottom].min
   end
 
@@ -112,7 +111,6 @@ class ReaderPane
   # @return [Gtk::Stack] The stack.
   def build_stack
     stack = build(Gtk::Stack, hexpand: true, vexpand: true)
-
     stack.add_named(empty_state("application-rss+xml-symbolic", label("No article selected.", "empty-state")), "empty")
     stack.add_named(@scroll, "article")
     stack

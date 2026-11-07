@@ -3,6 +3,20 @@
 module ImageStore
   module_function
 
+  # Download an image and keep it on disk.
+  #
+  # @param url [String] Where the image is.
+  # @param path [String] Where to keep the image.
+  # @return [String] The bytes of the image.
+  def download(url, path)
+    body = read(url)
+
+    FileUtils.mkdir_p(IMAGE_DIR)
+    File.binwrite(path, body)
+    prune
+    body
+  end
+
   # Read an image from disk, or download it and keep it there.
   #
   # An image that is read from disk counts as recently used, which decides what
@@ -23,20 +37,6 @@ module ImageStore
   rescue StandardError => error
     warn "reader: #{url}: #{error.message}"
     nil
-  end
-
-  # Download an image and keep it on disk.
-  #
-  # @param url [String] Where the image is.
-  # @param path [String] Where to keep the image.
-  # @return [String] The bytes of the image.
-  def download(url, path)
-    body = read(url)
-
-    FileUtils.mkdir_p(IMAGE_DIR)
-    File.binwrite(path, body)
-    prune
-    body
   end
 
   # Remove the images used least recently while the images kept are too large.

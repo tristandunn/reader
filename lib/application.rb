@@ -6,7 +6,6 @@ class Reader
   # @return [void]
   def run
     application = Gtk::Application.new("com.example.reader", :default_flags)
-
     application.signal_connect("activate") { |instance| activate(instance) }
     application.run([$PROGRAM_NAME] + ARGV)
   end
@@ -25,7 +24,6 @@ class Reader
     library.replace(library.load(refresh: false))
 
     window = MainWindow.new(application, library, state)
-
     window.present
     window.reload
   end

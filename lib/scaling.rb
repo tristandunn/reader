@@ -10,7 +10,6 @@ module Scaling
   # @return [Cairo::ImageSurface] The target.
   def draw(source, target)
     context = Cairo::Context.new(target)
-
     context.scale(target.width.fdiv(source.width), target.height.fdiv(source.height))
     context.set_source(source, 0, 0)
     context.source.filter = Cairo::Filter::GOOD

@@ -119,7 +119,6 @@ class ArticleList
   # @return [Gtk::SingleSelection] The selection.
   def build_selection
     selection = build(Gtk::SingleSelection, @model, autoselect: false, can_unselect: true)
-
     selection.signal_connect("selection-changed") { announce }
     selection
   end
@@ -132,7 +131,6 @@ class ArticleList
     @view  = build_view(on_activate)
     @empty = label("", "empty-state", xalign: 0.5)
     stack  = build(Gtk::Stack, vexpand: true)
-
     stack.add_named(build(Gtk::ScrolledWindow, child: @view, hscrollbar_policy: :never, vexpand: true), "list")
     stack.add_named(empty_state("mail-read-symbolic", @empty), "empty")
     stack
@@ -144,7 +142,6 @@ class ArticleList
   # @return [Gtk::ListView] The list.
   def build_view(on_activate)
     view = build(Gtk::ListView, @selection, @rows.factory, css: "articles")
-
     view.signal_connect("activate") { |_view, position| on_activate.call(@timeline.articles[position]) }
     view
   end

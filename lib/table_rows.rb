@@ -7,6 +7,15 @@ module TableRows
 
   module_function
 
+  # Return whether the markup of a cell should be bold.
+  #
+  # @param cell [Nokogiri::XML::Element] The `th` or `td` element.
+  # @param text [String] The markup of the cell.
+  # @return [Boolean] Whether the cell is a header cell with something in it.
+  def bold?(cell, text)
+    cell.name == "th" && !text.empty?
+  end
+
   # Return whether a table holds data, which is worth showing as a grid.
   #
   # Email newsletters lay out their whole content in tables, with paragraphs,
@@ -18,18 +27,7 @@ module TableRows
   # @return [Boolean] Whether no cell holds block content, and the text of the cells is short.
   def data?(table)
     cells = table.xpath(".//td | .//th")
-
     cells.none? { |cell| cell.at_xpath(BLOCKS) } && short_text?(cells.map { |cell| Text.plain(cell.inner_html) })
-  end
-
-  # Read the rows of a table, leaving out the empty ones.
-  #
-  # @param table [Nokogiri::XML::Element] The `table` element.
-  # @return [Array<Array<String>>] The markup of each cell, by row.
-  def parse(table)
-    rows = table.xpath(".//tr").map { |row| row.xpath("./th | ./td").map { |cell| markup(cell) } }
-
-    rows.reject { |row| row.all?(&:empty?) }
   end
 
   # Return the markup of one table cell, which is bold for a header cell.
@@ -46,13 +44,13 @@ module TableRows
     end
   end
 
-  # Return whether the markup of a cell should be bold.
+  # Read the rows of a table, leaving out the empty ones.
   #
-  # @param cell [Nokogiri::XML::Element] The `th` or `td` element.
-  # @param text [String] The markup of the cell.
-  # @return [Boolean] Whether the cell is a header cell with something in it.
-  def bold?(cell, text)
-    cell.name == "th" && !text.empty?
+  # @param table [Nokogiri::XML::Element] The `table` element.
+  # @return [Array<Array<String>>] The markup of each cell, by row.
+  def parse(table)
+    rows = table.xpath(".//tr").map { |row| row.xpath("./th | ./td").map { |cell| markup(cell) } }
+    rows.reject { |row| row.all?(&:empty?) }
   end
 
   # Return whether the text of the cells of a table is worth a grid.

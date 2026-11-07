@@ -33,7 +33,6 @@ class FeedsHeading
   # @return [void]
   def add_click
     click = Gtk::GestureClick.new
-
     click.signal_connect("pressed") { toggle }
     @widget.add_controller(click)
   end

@@ -131,7 +131,6 @@ class ArticleActions
   # @return [void]
   def add_action(name, handler)
     action = Gio::SimpleAction.new(name)
-
     action.signal_connect("activate") { send(handler, @target) }
     @window.add_action(action)
   end

@@ -119,7 +119,6 @@ module Ui
   # @return [Gtk::Button] The button.
   def toolbar_button(icon, tooltip, &)
     button = build(Gtk::Button, icon_name: icon, tooltip_text: tooltip, css: "toolbar-button")
-
     button.signal_connect("clicked", &)
     button
   end

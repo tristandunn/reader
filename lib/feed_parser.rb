@@ -14,7 +14,6 @@ class FeedParser
   # @return [Array<Article>] The articles, up to the limit per feed, or none when the XML cannot be read.
   def parse(xml)
     document = Nokogiri::XML(xml)
-
     document.remove_namespaces!
     read_channel(document)
     document.xpath("//item | //entry").first(ARTICLES_PER_FEED).map { |node| article(node) }

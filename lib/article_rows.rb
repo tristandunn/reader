@@ -61,7 +61,6 @@ class ArticleRows
   # @return [void]
   def bind(item)
     row = @rows[item]
-
     row.bind(@timeline.call.articles[item.position])
     @bound[item] = row
   end
@@ -74,7 +73,6 @@ class ArticleRows
   # @return [Gtk::SignalListItemFactory] The factory.
   def build_factory
     factory = Gtk::SignalListItemFactory.new
-
     factory.signal_connect("setup") { |_factory, item| setup(item) }
     factory.signal_connect("bind") { |_factory, item| bind(item) }
     factory.signal_connect("unbind") { |_factory, item| @bound.delete(item) }

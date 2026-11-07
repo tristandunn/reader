@@ -144,7 +144,6 @@ class Sidebar
   # @return [Gtk::ListBox] The list.
   def build_list
     list = build(Gtk::ListBox, css: "sidebar", selection_mode: :single)
-
     list.signal_connect("row-selected") { |_box, row| select_row(row) }
     list
   end
@@ -200,7 +199,6 @@ class Sidebar
   def visible_target(from, delta)
     positions = delta.negative? ? (0...from).to_a.reverse : ((from + 1)...@rows.size).to_a
     shown     = positions.select { |position| @rows[position].widget.visible? }
-
     shown[delta.abs - 1]
   end
 end
