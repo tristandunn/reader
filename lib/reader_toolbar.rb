@@ -8,26 +8,27 @@ class ReaderToolbar
   # Build the header above the reading pane, with the buttons that act on the
   # article being read.
   #
+  # @param state [ReadState] What decides whether the article is read or starred.
   # @param commands [#call] Called to get the {Commands} that the buttons run, which are created after the toolbar.
-  def initialize(commands)
+  def initialize(state, commands)
+    @state   = state
     @read    = toolbar_button("mail-read-symbolic", "Mark as Read") { commands.call.toggle_read }
     @star    = toolbar_button("non-starred-symbolic", "Mark as Starred") { commands.call.toggle_star }
     @next    = toolbar_button("go-down-symbolic", "Next Unread") { commands.call.next_unread }
     @browser = toolbar_button("send-to-symbolic", "Open in Browser") { commands.call.open_in_browser }
     @widget  = pane_header(start: [@read, @star], finish: [@browser, @next], controls: true)
-    update(nil, read: false, starred: false)
+
+    update(nil)
   end
 
   # Match the buttons to the article being read.
   #
   # @param article [Article, nil] The article, which disables the buttons that act on one when absent.
-  # @param read [Boolean] Whether the article is read.
-  # @param starred [Boolean] Whether the article is starred.
   # @return [void]
-  def update(article, read:, starred:)
+  def update(article)
     [@read, @star, @browser].each { |button| button.sensitive = !article.nil? }
-    show_read(read)
-    show_star(starred)
+    show_read(!article.nil? && @state.read?(article))
+    show_star(!article.nil? && @state.starred?(article))
   end
 
   private

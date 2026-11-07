@@ -28,6 +28,13 @@ class ArticleList
     @widget    = build_stack(on_activate)
   end
 
+  # Return whether the list is scrolled to the top.
+  #
+  # @return [Boolean] Whether the first article is at the top edge of the list.
+  def at_top?
+    @view.vadjustment.value.zero?
+  end
+
   # Move the keyboard focus to the list, onto the selected article.
   #
   # @return [void]
@@ -58,17 +65,10 @@ class ArticleList
 
   # Update the read and starred styling of a row to match the state.
   #
-  # @param article [Article] The article whose row to update.
+  # @param article [Article, nil] The article whose row to update, or every row in view when absent.
   # @return [void]
   def restyle(article)
     @rows.restyle(article)
-  end
-
-  # Update the styling of every row in view.
-  #
-  # @return [void]
-  def restyle_all
-    @rows.restyle_all
   end
 
   # Select an article and move the focus to it, which announces it.
@@ -130,7 +130,8 @@ class ArticleList
   def build_stack(on_activate)
     @view  = build_view(on_activate)
     @empty = label("", "empty-state", xalign: 0.5)
-    stack  = build(Gtk::Stack, vexpand: true)
+
+    stack = build(Gtk::Stack, vexpand: true)
     stack.add_named(build(Gtk::ScrolledWindow, child: @view, hscrollbar_policy: :never, vexpand: true), "list")
     stack.add_named(empty_state("mail-read-symbolic", @empty), "empty")
     stack

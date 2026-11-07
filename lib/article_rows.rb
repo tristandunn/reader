@@ -40,17 +40,14 @@ class ArticleRows
 
   # Update the styling of the row of an article, if it is in view.
   #
-  # @param article [Article] The article whose row to update.
+  # @param article [Article, nil] The article whose row to update, or every row in view when absent.
   # @return [void]
   def restyle(article)
-    @bound.each_value.find { |row| row.article.id == article.id }&.restyle
-  end
-
-  # Update the styling of every row in view.
-  #
-  # @return [void]
-  def restyle_all
-    @bound.each_value(&:restyle)
+    if article
+      @bound.each_value.find { |row| row.article.id == article.id }&.restyle
+    else
+      @bound.each_value(&:restyle)
+    end
   end
 
   private

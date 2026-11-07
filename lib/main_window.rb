@@ -62,14 +62,10 @@ class MainWindow
   # @param article [Article, nil] The article that changed, or nil when several did.
   # @return [void]
   def article_changed(article)
-    if article
-      @list.restyle(article)
-    else
-      @list.restyle_all
-    end
+    @list.restyle(article)
+    @toolbar.update(@reader.article)
 
     update_counts
-    update_toolbar
   end
 
   # Build the article list beneath its header.
@@ -97,7 +93,7 @@ class MainWindow
   # @return [Gtk::Box] The column.
   def build_reader_column
     @reader  = ReaderPane.new(downloader: ImageDownloader.new)
-    @toolbar = ReaderToolbar.new(-> { @commands })
+    @toolbar = ReaderToolbar.new(@state, -> { @commands })
 
     box(:vertical, 0, [@toolbar.widget, @reader.widget], css: "content-column")
   end
@@ -127,10 +123,12 @@ class MainWindow
     show_entry(@entry)
   end
 
-  # Show the icon and the unread count of a feed that has just been loaded.
+  # Show the icon of a feed that has just been loaded, and its articles.
   #
-  # The article list is left alone until every feed is loaded, so that it does
-  # not shift while it is being read.
+  # The article list is only updated when it is scrolled to the top, since
+  # updating it scrolls it back there and would move it while it is being read.
+  # Otherwise only the unread counts change, and the list waits for the
+  # articles of every feed to be applied.
   #
   # @param feed [Feed] The feed that was loaded.
   # @param articles [Array<Article>] The articles of the feed.
@@ -138,7 +136,12 @@ class MainWindow
   def feed_loaded(feed, articles)
     @library.merge(feed, articles)
     @sidebar.refresh_icon(feed)
-    @sidebar.counts = @library.badge_counts(@entries)
+
+    if @list.at_top?
+      refresh_entry
+    else
+      @sidebar.counts = @library.badge_counts(@entries)
+    end
   end
 
   # Show an article in the reading pane and mark it as read.
@@ -149,7 +152,7 @@ class MainWindow
     @reader.show(article)
 
     if @state.read?(article)
-      update_toolbar
+      @toolbar.update(@reader.article)
     else
       @actions.mark_read(article, true)
     end
@@ -163,6 +166,7 @@ class MainWindow
 
     @list.refresh(@library.articles_for(@entry, hide_read: @list_header.hide_read?), open_id)
     @reader.refresh(@library.find(open_id))
+
     update_counts
   end
 
@@ -174,8 +178,9 @@ class MainWindow
     @entry = entry
     @list.show(@library.articles_for(entry, hide_read: @list_header.hide_read?), entry.empty)
     @reader.show(nil)
+    @toolbar.update(@reader.article)
+
     update_counts
-    update_toolbar
   end
 
   # Refresh the badges of the sidebar and the name and unread count in the
@@ -185,15 +190,5 @@ class MainWindow
   def update_counts
     @sidebar.counts = @library.badge_counts(@entries)
     @list_header.update(@entry.title, @list.timeline.unread_count)
-  end
-
-  # Match the toolbar of the reading pane to the article being read.
-  #
-  # @return [void]
-  def update_toolbar
-    article = @reader.article
-
-    @toolbar.update(article, read:    !article.nil? && @state.read?(article),
-                             starred: !article.nil? && @state.starred?(article))
   end
 end
