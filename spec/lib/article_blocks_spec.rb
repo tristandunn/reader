@@ -24,6 +24,30 @@ RSpec.describe ArticleBlocks do
       end
     end
 
+    context "with a video" do
+      let(:html) { %(<p>Before</p><video><source src="https://example.com/a.mp4"></video><p>After</p>) }
+
+      it "becomes a block holding the URL" do
+        expect(blocks).to eq([[:p, "Before"], [:video, "https://example.com/a.mp4"], [:p, "After"]])
+      end
+    end
+
+    context "with a video with a relative source" do
+      let(:html) { %(<video src="/a.mp4"></video>) }
+
+      it "keeps the source for the article to resolve" do
+        expect(blocks).to eq([[:video, "/a.mp4"]])
+      end
+    end
+
+    context "with a video that has no source" do
+      let(:html) { "<p>Before</p><video></video>" }
+
+      it "leaves it out" do
+        expect(blocks).to eq([[:p, "Before"]])
+      end
+    end
+
     context "with headings" do
       let(:html) { "<h2>Title</h2><p>Text</p>" }
 
@@ -77,6 +101,16 @@ RSpec.describe ArticleBlocks do
 
       it "keeps the image without the link" do
         expect(blocks).to eq([[:image, ["a.png", 425]]])
+      end
+    end
+
+    context "with a link around a video" do
+      let(:html) do
+        %(<p>See <a href="https://example.com">this <video src="https://example.com/a.mp4"></video> clip</a></p>)
+      end
+
+      it "keeps the video without the link" do
+        expect(blocks).to eq([[:p, "See this"], [:video, "https://example.com/a.mp4"], [:p, "clip"]])
       end
     end
 

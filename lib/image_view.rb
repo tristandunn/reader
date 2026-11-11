@@ -90,15 +90,20 @@ class ImageView
 
   # Draw the image scaled to fill the widget.
   #
+  # GTK draws a widget that has not been given a size yet at zero by zero, which
+  # Cairo cannot scale to, so nothing is drawn until there is room.
+  #
   # @param cairo [Cairo::Context] The context to draw on.
   # @param width [Integer] The width of the widget.
   # @param height [Integer] The height of the widget.
   # @return [void]
   def paint(cairo, width, height)
-    cairo.scale(width.to_f / @width, height.to_f / @height)
-    cairo.set_source(@surface, 0, 0)
-    cairo.source.filter = Cairo::Filter::GOOD
-    cairo.paint
+    if [width, height].all?(&:positive?)
+      cairo.scale(width.to_f / @width, height.to_f / @height)
+      cairo.set_source(@surface, 0, 0)
+      cairo.source.filter = Cairo::Filter::GOOD
+      cairo.paint
+    end
   end
 
   # Return the most pixels wide the image is worth keeping.

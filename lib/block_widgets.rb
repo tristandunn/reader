@@ -3,6 +3,8 @@
 class BlockWidgets
   include Ui
 
+  LABEL_CLASSES = { pre: "body-pre", h: "body-h" }.freeze
+
   # Create the builder for the blocks of one article.
   #
   # @param article [Article] The article the blocks belong to.
@@ -19,17 +21,17 @@ class BlockWidgets
   # Build the widget for a block.
   #
   # @param kind [Symbol] The kind of the block, as produced by {ArticleBlocks}.
-  # @param markup [String, Array] The markup of the block, or its parts for lists, quotes, tables and images.
+  # @param markup [String, Array] The markup of the block, its parts, or the source of a video.
   # @return [Gtk::Widget] The widget.
+  # @return [nil] When the block cannot be shown.
   def widget(kind, markup)
     case kind
     when :list then list(markup)
     when :quote then quote(markup)
     when :table then table(markup)
     when :image then image(*markup)
-    when :pre then body_label(markup, "body-pre")
-    when :h then body_label(markup, "body-h")
-    else body_label(markup, "body-p")
+    when :video then video(markup)
+    else body_label(markup, LABEL_CLASSES.fetch(kind, "body-p"))
     end
   end
 
@@ -68,14 +70,13 @@ class BlockWidgets
   #
   # @param source [String] The source of the image.
   # @param display_width [Integer] The width the article asks for, or zero.
-  # @return [Gtk::Widget] The image, or an empty widget when the source cannot be used.
+  # @return [Gtk::Widget] The image.
+  # @return [nil] When the source cannot be used.
   def image(source, display_width)
     url = absolute_url(source)
 
     if url
       ImageView.new(url, display_width, downloader: @downloader, on_ready: @on_image, still_open: @still_open).widget
-    else
-      build(Gtk::Box, :vertical, 0, visible: false)
     end
   end
 
@@ -135,5 +136,26 @@ class BlockWidgets
   # @return [void]
   def table_row(grid, row, index)
     row.each_with_index { |cell, column| grid.attach(table_cell(cell, header: index.zero?), column, index, 1, 1) }
+  end
+
+  # Build a button that opens a video in the browser.
+  #
+  # The browser plays the video, so the button is styled as part of the app
+  # rather than as a link in the text of the article.
+  #
+  # @param source [String] The source of the video.
+  # @return [Gtk::LinkButton] The button.
+  # @return [nil] When the source cannot be used.
+  def video(source)
+    url = absolute_url(source)
+
+    if url
+      icon = build(Gtk::Image, icon_name: "media-playback-start-symbolic")
+
+      build(Gtk::LinkButton, url,
+            css:    "body-video",
+            child:  box(:horizontal, 8, [icon, label("Play video in browser.")]),
+            halign: :start)
+    end
   end
 end

@@ -30,7 +30,7 @@ require "tmpdir"
 require "yaml"
 
 %w(
-  config memory text shortcuts column worker_pool article chronology timeline markup_tags image_tag block_runs
+  config memory text shortcuts column worker_pool article chronology timeline markup_tags image_tag video_tag block_runs
   table_rows article_blocks image_store image_downloader icon_links feed_icon monogram feed_cache feed_parser feed
   read_state library commands
 ).each { |name| require_relative "../lib/#{name}" }

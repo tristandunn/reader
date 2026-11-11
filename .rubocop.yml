@@ -19,6 +19,10 @@ Layout/HashAlignment:
   EnforcedColonStyle: table
   EnforcedHashRocketStyle: table
 
+Metrics/ClassLength:
+  Enabled: true
+  Max: 125
+
 Naming/RescuedExceptionsVariableName:
   Enabled: true
   PreferredName: error

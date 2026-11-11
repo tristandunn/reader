@@ -150,7 +150,13 @@ class ReaderPane
     widgets = BlockWidgets.new(article, downloader: @downloader, on_image: method(:add_image),
                                         still_open: -> { @article&.id == article.id })
 
-    blocks_for(article).each { |kind, markup| @content.append(widgets.widget(kind, markup)) }
+    blocks_for(article).each do |kind, markup|
+      widget = widgets.widget(kind, markup)
+
+      if widget
+        @content.append(widget)
+      end
+    end
   end
 
   # Return whether an article has nothing to show but its snippet.

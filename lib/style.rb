@@ -206,6 +206,14 @@ CSS = <<~STYLE
   }
   .body-th { background-color: var(--well); }
   .body-image { border-radius: 8px; }
+  .body-video {
+    background-color: var(--well);
+    border: 1px solid var(--separator);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    padding: 8px 14px;
+  }
+  .body-video:hover { background-color: var(--muted-selection); }
   .body-bullet { color: var(--text-secondary); min-width: 14px; }
   .reader label link, .reader label link:visited { color: var(--link); }
 

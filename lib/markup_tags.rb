@@ -1,13 +1,22 @@
 # frozen_string_literal: true
 
 module MarkupTags
-  SKIPPED = %w(script style iframe svg video audio form button).freeze
+  CODE = "<span font_family='monospace' size='92%' background='#8e8e93' bgalpha='18%'>"
 
   CONTAINERS = %w(p div section article figure figcaption ul ol dl dd dt
                   header footer main aside tbody thead tfoot tr td th).freeze
 
-  # A translucent gray reads as a tint on a light page and on a dark one.
-  CODE = "<span font_family='monospace' size='92%' background='#8e8e93' bgalpha='18%'>"
+  CONTEXTS = { "li" => :li, "blockquote" => :quote }.freeze
+
+  HANDLERS = {
+    "a"     => :link,
+    "img"   => :image,
+    "pre"   => :pre,
+    "table" => :table,
+    "video" => :video
+  }.freeze
+
+  HEADING = /\Ah[1-6]\z/
 
   INLINE = {
     "br"     => ["\n", ""],
@@ -25,9 +34,5 @@ module MarkupTags
     "tt"     => [CODE, "</span>"]
   }.freeze
 
-  HEADING = /\Ah[1-6]\z/
-
-  CONTEXTS = { "li" => :li, "blockquote" => :quote }.freeze
-
-  HANDLERS = { "pre" => :pre, "img" => :image, "table" => :table, "a" => :link }.freeze
+  SKIPPED = %w(script style iframe svg audio form button).freeze
 end

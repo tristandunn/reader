@@ -24,7 +24,9 @@ class ArticleBlocks
   # @return [Array<Array>] The blocks, in document order, each a kind followed by its markup.
   def parse(html)
     Nokogiri::HTML5.fragment(html).children.each { |node| walk(node) }
+
     flush
+
     BlockRuns.merge(@blocks)
   end
 
@@ -53,13 +55,27 @@ class ArticleBlocks
     end
   end
 
+  # Add a block, after the text that came before it.
+  #
+  # @param kind [Symbol] The kind of the block.
+  # @param content [String, Array] The markup of the block, or its parts.
+  # @return [void]
+  def emit(kind, content)
+    flush
+
+    @blocks << [kind, content]
+  end
+
   # Turn the text gathered so far into a block of the current kind.
   #
   # @return [void]
   def flush
     text = @buffer.gsub(/ *\n */, "\n").strip
 
-    @blocks << [@context, text] unless text.empty?
+    unless text.empty?
+      @blocks << [@context, text]
+    end
+
     @buffer.clear
   end
 
@@ -71,8 +87,7 @@ class ArticleBlocks
   # @return [void]
   def image(node)
     if ImageTag.usable?(node)
-      flush
-      @blocks << [:image, ImageTag.block(node)]
+      emit(:image, ImageTag.block(node))
     end
   end
 
@@ -102,13 +117,13 @@ class ArticleBlocks
 
   # Return whether a link should be kept.
   #
-  # An image inside a link would end the running text block, which would split
-  # the tags of the link.
+  # An image or a video inside a link would end the running text block, which
+  # would split the tags of the link.
   #
   # @param node [Nokogiri::XML::Element] The `a` element.
-  # @return [Boolean] Whether the link goes to the web and has no image inside.
+  # @return [Boolean] Whether the link goes to the web and has no image or video inside.
   def linkable?(node)
-    node["href"].to_s.match?(%r{\Ahttps?://}i) && node.at_xpath(".//img").nil?
+    node["href"].to_s.match?(%r{\Ahttps?://}i) && node.at_xpath(".//img | .//video").nil?
   end
 
   # Emit a code block that keeps its whitespace.
@@ -119,8 +134,7 @@ class ArticleBlocks
   # @param node [Nokogiri::XML::Element] The `pre` element.
   # @return [void]
   def pre(node)
-    flush
-    @blocks << [:pre, "<span insert_hyphens='false'>#{Text.escape(node.text.strip)}</span>"]
+    emit(:pre, "<span insert_hyphens='false'>#{Text.escape(node.text.strip)}</span>")
   end
 
   # Emit a table block, which is laid out as a grid later.
@@ -131,10 +145,23 @@ class ArticleBlocks
   # @return [void]
   def table(node)
     if TableRows.data?(node)
-      flush
-      @blocks << [:table, TableRows.parse(node)]
+      emit(:table, TableRows.parse(node))
     else
       within(@context) { children(node) }
+    end
+  end
+
+  # Emit a video block.
+  #
+  # Nothing is emitted for a video without a usable source.
+  #
+  # @param node [Nokogiri::XML::Element] The `video` element.
+  # @return [void]
+  def video(node)
+    source = VideoTag.source(node)
+
+    if source
+      emit(:video, source)
     end
   end
 
@@ -187,11 +214,14 @@ class ArticleBlocks
   # @return [void]
   def within(context)
     flush
-    previous = @context
 
-    @context = context
-    yield
-    flush
-    @context = previous
+    @context.tap do |previous|
+      @context = context
+
+      yield
+      flush
+
+      @context = previous
+    end
   end
 end
