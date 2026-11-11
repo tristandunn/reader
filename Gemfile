@@ -15,7 +15,7 @@ group :development, :test do
 end
 
 group :development do
-  gem "irb",                 "1.18.0"
+  gem "irb",                 "1.19.0"
   gem "rake",                "13.4.2"
   gem "rubocop",             "1.92.2", require: false
   gem "rubocop-performance", "1.27.0", require: false
