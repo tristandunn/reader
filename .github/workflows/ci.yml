@@ -1,0 +1,31 @@
+name: CI
+
+on: # yamllint disable-line rule:truthy
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  Ruby:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install the GTK libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes \
+            libgirepository1.0-dev \
+            libgtk-4-dev
+
+      - name: Install Ruby
+        uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1.338.0
+        with:
+          bundler-cache: true
+
+      - name: Run continuous integration
+        run: bin/ci
