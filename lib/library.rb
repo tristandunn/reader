@@ -24,9 +24,12 @@ class Library
   #
   # @param entry [Library::Entry] The entry whose articles to list.
   # @param hide_read [Boolean] Whether to leave out the articles that have been read.
+  # @param keep [Set<String>] The IDs of articles to list even when they have been read.
   # @return [Array<Article>] The matching articles.
-  def articles_for(entry, hide_read: false)
-    @articles.select(&entry.matches).reject { |article| hide_read && @state.read?(article) }
+  def articles_for(entry, hide_read: false, keep: Set.new)
+    @articles.select do |article|
+      keep.include?(article.id) || (entry.matches.call(article) && !(hide_read && @state.read?(article)))
+    end
   end
 
   # Return the count that the badge of each entry shows.

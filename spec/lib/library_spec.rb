@@ -64,6 +64,28 @@ RSpec.describe Library do
     end
   end
 
+  describe "#articles_for with kept articles" do
+    it "keeps a read article that is listed from leaving All Unread" do
+      state.mark_read(articles[:newest], true)
+
+      expect(library.articles_for(entry("All Unread"),
+                                  keep: Set["3"])).to eq(articles.values_at(:newest, :oldest, :undated))
+    end
+
+    it "keeps a read article that is listed when hiding read articles" do
+      state.mark_read(articles[:oldest], true)
+
+      expect(library.articles_for(entry("alpha"), hide_read: true, keep: Set["1"]))
+        .to eq(articles.values_at(:oldest, :undated))
+    end
+
+    it "still leaves out a read article that is not kept" do
+      state.mark_read(articles[:newest], true)
+
+      expect(library.articles_for(entry("All Unread"), keep: Set["1"])).to eq(articles.values_at(:oldest, :undated))
+    end
+  end
+
   describe "#badge_counts" do
     it "counts the unread articles of each entry" do
       state.mark_read(articles[:newest], true)

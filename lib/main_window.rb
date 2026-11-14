@@ -73,7 +73,7 @@ class MainWindow
   # @return [Gtk::Box] The column.
   def build_list_column
     @list_header = ListHeader.new(on_mark_all_read: -> { @commands.mark_all_read },
-                                  on_toggle_read:   -> { refresh_entry })
+                                  on_toggle_read:   -> { refresh_entry(keep_listed: false) })
     @list        = ArticleList.new(@state, menu: @actions.method(:menu), on_activate: @actions.method(:open_in_browser),
                                            on_select: method(:open_article))
 
@@ -160,11 +160,17 @@ class MainWindow
 
   # List the articles of the current entry again, keeping the open article.
   #
+  # The articles already listed stay, even once read, unless the list is being
+  # filtered again. Otherwise an article would disappear as it is viewed
+  # while a refresh is loading.
+  #
+  # @param keep_listed [Boolean] Whether to keep the articles already listed.
   # @return [void]
-  def refresh_entry
+  def refresh_entry(keep_listed: true)
     open_id = @reader.article&.id
+    keep    = keep_listed ? Set.new(@list.timeline.articles.map(&:id)) : Set.new
 
-    @list.refresh(@library.articles_for(@entry, hide_read: @list_header.hide_read?), open_id)
+    @list.refresh(@library.articles_for(@entry, hide_read: @list_header.hide_read?, keep: keep), open_id)
     @reader.refresh(@library.find(open_id))
 
     update_counts
