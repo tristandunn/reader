@@ -70,7 +70,8 @@ class ColumnFit
       @pending = GLib::Idle.add do
         @pending = nil
         fit
-        false # one-shot
+
+        false
       end
     end
   end

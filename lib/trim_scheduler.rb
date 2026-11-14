@@ -17,7 +17,8 @@ class TrimScheduler
     @source = GLib::Timeout.add(TRIM_DELAY) do
       @source = nil
       Memory.trim
-      false # one-shot
+
+      false
     end
   end
 end

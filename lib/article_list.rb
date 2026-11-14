@@ -40,6 +40,7 @@ class ArticleList
   # @return [void]
   def focus
     if @model.n_items.positive?
+      @view.grab_focus
       @view.scroll_to(selected_position || 0, :focus, nil)
     end
   end

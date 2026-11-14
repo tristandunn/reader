@@ -72,7 +72,8 @@ class ImageView
     @downloader.fetch(url, still_wanted: @still_open) do |data|
       GLib::Idle.add do
         show(data) if show?(data)
-        false # one-shot
+
+        false
       end
     end
   end

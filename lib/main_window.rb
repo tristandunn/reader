@@ -21,11 +21,21 @@ class MainWindow
     build_ui
   end
 
-  # Show the window.
+  # Show the window, with the keyboard focus on the article list so the arrow
+  # keys move through the articles.
+  #
+  # The focus moves once the window has been laid out, since the rows of the
+  # article list do not exist before then and the sidebar would keep the focus.
   #
   # @return [void]
   def present
     @window.present
+
+    GLib::Idle.add do
+      @list.focus
+
+      false
+    end
   end
 
   # Fetch the feeds off the main loop, then swap the results in.

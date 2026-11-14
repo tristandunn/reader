@@ -50,7 +50,8 @@ class Refresher
   def on_main_loop
     GLib::Idle.add do
       yield
-      false # one-shot
+
+      false
     end
   end
 
