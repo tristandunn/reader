@@ -17,12 +17,12 @@ end
 group :development do
   gem "irb",                 "1.19.0"
   gem "rake",                "13.4.2"
-  gem "rubocop",             "1.92.3", require: false
+  gem "rubocop",             "1.93.0", require: false
   gem "rubocop-performance", "1.27.0", require: false
   gem "rubocop-rake",        "0.7.1",  require: false
-  gem "rubocop-rspec",       "3.10.2", require: false
+  gem "rubocop-rspec",       "3.11.0", require: false
   gem "rubocop-vibe",        "0.8.0",  require: false
-  gem "yard-lint",           "1.13.1", require: false
+  gem "yard-lint",           "1.15.0", require: false
 end
 
 group :test do
